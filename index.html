@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Be My Valentine</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #fff3f6;
+        --text: #3b0a2a;
+        --accent: #ff4d88;
+        --accent-dark: #e13e78;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        min-height: 100svh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        padding: env(safe-area-inset-top) env(safe-area-inset-right)
+          env(safe-area-inset-bottom) env(safe-area-inset-left);
+      }
+
+      .card {
+        background: white;
+        border-radius: 24px;
+        padding: 40px 32px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+        width: min(560px, 92vw);
+        text-align: center;
+        position: relative;
+      }
+
+      h1 {
+        font-size: clamp(28px, 4vw, 40px);
+        margin: 0 0 24px;
+      }
+
+      .buttons {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        align-items: center;
+        margin-top: 16px;
+        position: relative;
+        min-height: 56px;
+      }
+
+      button {
+        font-size: 18px;
+        border: none;
+        border-radius: 999px;
+        padding: 12px 28px;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      button:active {
+        transform: scale(0.98);
+      }
+
+      .yes {
+        background: var(--accent);
+        color: white;
+        box-shadow: 0 10px 20px rgba(255, 77, 136, 0.35);
+      }
+
+      .yes:hover {
+        background: var(--accent-dark);
+      }
+
+      .no {
+        background: #ffe0ea;
+        color: var(--text);
+        position: relative;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        touch-action: none;
+        transition: left 0.18s ease, top 0.18s ease, transform 0.15s ease,
+          box-shadow 0.15s ease;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .result h2 {
+        font-size: clamp(24px, 4vw, 36px);
+        margin: 0 0 8px;
+      }
+
+      .bears {
+        margin-top: 24px;
+        height: 120px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .bear {
+        font-size: 72px;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        animation: hug 2.2s ease-in-out infinite;
+      }
+
+      .bear.left {
+        left: 20%;
+      }
+
+      .bear.right {
+        right: 20%;
+        animation-delay: 0.2s;
+      }
+
+      @keyframes hug {
+        0%,
+        100% {
+          transform: translateY(-50%) scale(1);
+        }
+        45% {
+          transform: translateY(-50%) scale(1.05);
+        }
+        50% {
+          transform: translateY(-50%) scale(1.08);
+        }
+        55% {
+          transform: translateY(-50%) scale(1.05);
+        }
+      }
+
+      .heart {
+        position: absolute;
+        font-size: 28px;
+        opacity: 0.85;
+        animation: float 2.8s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+          opacity: 0.7;
+        }
+        50% {
+          transform: translateY(-10px);
+          opacity: 1;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .buttons {
+          min-height: 80px;
+        }
+
+        .card {
+          padding: 32px 24px;
+        }
+
+        button {
+          font-size: 16px;
+          padding: 12px 24px;
+        }
+
+        .bears {
+          height: 100px;
+        }
+
+        .bear {
+          font-size: 64px;
+        }
+      }
+
+      .escape-scene {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 3;
+      }
+
+      .bin {
+        position: absolute;
+        width: 90px;
+        height: 90px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 64px;
+        opacity: 0;
+        transform: scale(0.7);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        pointer-events: auto;
+        cursor: pointer;
+        z-index: 3;
+      }
+
+      .bin-icon {
+        font-size: 64px;
+        line-height: 1;
+        position: relative;
+        z-index: 1;
+      }
+
+      .no.in-bin {
+        position: absolute;
+        left: 50%;
+        top: 55%;
+        transform: translate(-50%, -50%) scale(0.6);
+        box-shadow: none;
+        pointer-events: auto;
+        z-index: 2;
+      }
+
+      .speech {
+        position: absolute;
+        left: 50%;
+        bottom: 100%;
+        transform: translate(-50%, -12px);
+        background: #ffffff;
+        color: var(--text);
+        padding: 8px 12px;
+        border-radius: 14px;
+        border: 2px solid #ffd3e2;
+        font-size: 14px;
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        z-index: 4;
+      }
+
+      .speech.show {
+        opacity: 1;
+        transform: translate(-50%, -18px);
+      }
+
+      .speech::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 100%;
+        transform: translateX(-50%);
+        border-width: 8px 8px 0 8px;
+        border-style: solid;
+        border-color: #ffd3e2 transparent transparent transparent;
+      }
+
+      .bin.open {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      .black-hole {
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-radius: 999px;
+        background: #12000d;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+        opacity: 0;
+        transition: opacity 0.4s ease, width 0.4s ease, height 0.4s ease;
+      }
+
+      .black-hole.open {
+        opacity: 1;
+        width: 140px;
+        height: 140px;
+      }
+
+      .sink {
+        transition: transform 0.7s ease, opacity 0.7s ease;
+        transform: scale(0.2);
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <section class="question" id="questionView">
+        <h1>Will you be my Valentine?</h1>
+        <div class="buttons" id="buttonZone">
+          <button class="yes" id="yesButton">Yes</button>
+          <button class="no" id="noButton">No</button>
+        </div>
+      </section>
+
+      <section class="result hidden" id="resultView">
+        <h2>I knew it!</h2>
+        <p>You just made my day. 💖</p>
+        <div class="bears" aria-hidden="true">
+          <span class="bear left">🐻</span>
+          <span class="bear right">🐻</span>
+          <span class="heart" style="left: 50%; top: 10%;">💗</span>
+          <span class="heart" style="left: 35%; top: 60%;">💞</span>
+          <span class="heart" style="left: 65%; top: 65%;">💓</span>
+        </div>
+      </section>
+    </main>
+
+    <div class="escape-scene" aria-hidden="true">
+      <div class="bin" id="dustbin">
+        <span class="bin-icon">🗑️</span>
+        <div class="speech" id="noSpeech">Really? You really want to say no?</div>
+      </div>
+      <div class="black-hole" id="blackHole"></div>
+    </div>
+
+    <script>
+      const yesButton = document.getElementById("yesButton");
+      const noButton = document.getElementById("noButton");
+      const questionView = document.getElementById("questionView");
+      const resultView = document.getElementById("resultView");
+      const dustbin = document.getElementById("dustbin");
+      const blackHole = document.getElementById("blackHole");
+      const noSpeech = document.getElementById("noSpeech");
+      let lastTouchTime = 0;
+      let lastYesTouchTime = 0;
+      let chaseCount = 0;
+      let isEscaping = false;
+      let isFinalSequence = false;
+      let swirlAnimationId = null;
+      let isBlackHoleActive = false;
+      let hasSpokenInBin = false;
+      let readyForBlackHole = false;
+
+      const getViewport = () => {
+        const viewport = window.visualViewport;
+        return {
+          width: viewport ? viewport.width : window.innerWidth,
+          height: viewport ? viewport.height : window.innerHeight,
+          offsetLeft: viewport ? viewport.offsetLeft : 0,
+          offsetTop: viewport ? viewport.offsetTop : 0,
+        };
+      };
+
+      const placeNoButtonAt = (x, y) => {
+        const buttonRect = noButton.getBoundingClientRect();
+        const padding = 12;
+        const viewport = getViewport();
+        const maxX = viewport.width - buttonRect.width - padding;
+        const maxY = viewport.height - buttonRect.height - padding;
+
+        let nextX = x - viewport.offsetLeft;
+        let nextY = y - viewport.offsetTop;
+
+        nextX = Math.min(Math.max(nextX, padding), Math.max(maxX, padding));
+        nextY = Math.min(Math.max(nextY, padding), Math.max(maxY, padding));
+
+        noButton.style.left = `${nextX + viewport.offsetLeft}px`;
+        noButton.style.top = `${nextY + viewport.offsetTop}px`;
+      };
+
+      const placeNoButtonAwayFrom = (pointerX, pointerY) => {
+        const viewport = getViewport();
+        let nextX = pointerX;
+        let nextY = pointerY;
+
+        nextX += pointerX > viewport.width / 2 ? -160 : 160;
+        nextY += pointerY > viewport.height / 2 ? -90 : 90;
+
+        placeNoButtonAt(nextX, nextY);
+      };
+
+      const getFinalNoSpot = () => {
+        const viewport = getViewport();
+        return {
+          x: viewport.width * 0.3 + viewport.offsetLeft,
+          y: viewport.height * 0.7 + viewport.offsetTop,
+        };
+      };
+
+      const setNoButtonFixed = () => {
+        if (noButton.dataset.fixed === "true") return;
+        const rect = noButton.getBoundingClientRect();
+        noButton.style.position = "fixed";
+        noButton.style.left = `${rect.left}px`;
+        noButton.style.top = `${rect.top}px`;
+        noButton.dataset.fixed = "true";
+      };
+
+      const handleTouchAttempt = (event) => {
+        const touch = event.touches ? event.touches[0] : event;
+        if (!touch) return;
+        if (noButton.classList.contains("in-bin")) {
+          if (!hasSpokenInBin) {
+            hasSpokenInBin = true;
+            readyForBlackHole = true;
+            noSpeech.classList.add("show");
+            setTimeout(() => {
+              noSpeech.classList.remove("show");
+            }, 1800);
+          } else if (readyForBlackHole) {
+            readyForBlackHole = false;
+            triggerBlackHoleSequence();
+          }
+          if (event.stopPropagation) event.stopPropagation();
+          return;
+        }
+        event.preventDefault();
+        lastTouchTime = Date.now();
+        setNoButtonFixed();
+        placeNoButtonAwayFrom(touch.clientX, touch.clientY);
+      };
+
+      const showResult = () => {
+        questionView.classList.add("hidden");
+        resultView.classList.remove("hidden");
+      };
+
+      yesButton.addEventListener("touchstart", () => {
+        lastYesTouchTime = Date.now();
+        showResult();
+      });
+      yesButton.addEventListener("click", () => {
+        if (Date.now() - lastYesTouchTime < 500) return;
+        showResult();
+      });
+
+      const maybeChase = (clientX, clientY) => {
+        if (isFinalSequence) return;
+        const rect = noButton.getBoundingClientRect();
+        const distance = Math.hypot(
+          clientX - (rect.left + rect.width / 2),
+          clientY - (rect.top + rect.height / 2)
+        );
+        if (distance < 140) {
+          setNoButtonFixed();
+          placeNoButtonAwayFrom(clientX, clientY);
+          if (!isEscaping) {
+            chaseCount += 1;
+            isEscaping = true;
+            setTimeout(() => {
+              isEscaping = false;
+            }, 200);
+            if (chaseCount >= 6) {
+              triggerFinalSequence();
+            }
+          }
+        }
+      };
+
+      const triggerFinalSequence = () => {
+        if (isFinalSequence) return;
+        isFinalSequence = true;
+        const viewport = getViewport();
+        const binX = viewport.width * 0.7;
+        const binY = viewport.height * 0.55;
+        const finalSpot = getFinalNoSpot();
+
+        dustbin.style.left = `${binX + viewport.offsetLeft}px`;
+        dustbin.style.top = `${binY + viewport.offsetTop}px`;
+        dustbin.classList.add("open");
+
+        setNoButtonFixed();
+        placeNoButtonAt(finalSpot.x, finalSpot.y);
+
+        setTimeout(() => {
+          placeNoButtonAt(binX + viewport.offsetLeft, binY + viewport.offsetTop);
+          noButton.classList.add("sink");
+        }, 400);
+
+        setTimeout(() => {
+          noButton.classList.remove("sink");
+          noButton.classList.add("in-bin");
+          noButton.style.position = "absolute";
+          noButton.style.left = "50%";
+          noButton.style.top = "55%";
+          noButton.style.transform = "translate(-50%, -50%) scale(0.6)";
+          noButton.style.pointerEvents = "auto";
+          dustbin.appendChild(noButton);
+        }, 1500);
+      };
+
+      const triggerBlackHoleSequence = () => {
+        if (isBlackHoleActive) return;
+        isBlackHoleActive = true;
+        const viewport = getViewport();
+        const holeSize = 160;
+        const holeX = viewport.width * 0.15;
+        const holeY = viewport.height * 0.2;
+
+        blackHole.style.left = `${holeX + viewport.offsetLeft}px`;
+        blackHole.style.top = `${holeY + viewport.offsetTop}px`;
+        blackHole.style.opacity = "1";
+        blackHole.classList.add("open");
+
+        const startRect = dustbin.getBoundingClientRect();
+        const startX = startRect.left + startRect.width / 2;
+        const startY = startRect.top + startRect.height / 2;
+        const endX = holeX + viewport.offsetLeft + holeSize / 2;
+        const endY = holeY + viewport.offsetTop + holeSize / 2;
+        const duration = 1400;
+        const startTime = performance.now();
+
+        const animateSwirl = (now) => {
+          const t = Math.min((now - startTime) / duration, 1);
+          const angle = t * Math.PI * 6;
+          const radius = (1 - t) * 120;
+          const lerpX = startX + (endX - startX) * t;
+          const lerpY = startY + (endY - startY) * t;
+
+          const x = lerpX + Math.cos(angle) * radius;
+          const y = lerpY + Math.sin(angle) * radius;
+          const scale = 1 - t * 0.8;
+
+          dustbin.style.left = `${x - startRect.width / 2}px`;
+          dustbin.style.top = `${y - startRect.height / 2}px`;
+          dustbin.style.transform = `scale(${scale})`;
+          dustbin.style.opacity = `${1 - t * 0.6}`;
+
+          if (t < 1) {
+            swirlAnimationId = requestAnimationFrame(animateSwirl);
+          } else {
+            dustbin.style.display = "none";
+            blackHole.classList.remove("open");
+            setTimeout(() => {
+              blackHole.style.opacity = "0";
+            }, 200);
+          }
+        };
+
+        if (swirlAnimationId) cancelAnimationFrame(swirlAnimationId);
+        swirlAnimationId = requestAnimationFrame(animateSwirl);
+      };
+
+      noButton.addEventListener("touchstart", handleTouchAttempt, { passive: false });
+      noButton.addEventListener("click", (event) => {
+        if (noButton.classList.contains("in-bin")) {
+          if (!hasSpokenInBin) {
+            hasSpokenInBin = true;
+            readyForBlackHole = true;
+            noSpeech.classList.add("show");
+            setTimeout(() => {
+              noSpeech.classList.remove("show");
+            }, 1800);
+          } else if (readyForBlackHole) {
+            readyForBlackHole = false;
+            triggerBlackHoleSequence();
+          }
+          if (event.stopPropagation) event.stopPropagation();
+          return;
+        }
+        if (Date.now() - lastTouchTime < 500) return;
+        handleTouchAttempt(event);
+      });
+
+
+      document.addEventListener("mousemove", (event) => {
+        maybeChase(event.clientX, event.clientY);
+      });
+      document.addEventListener(
+        "touchmove",
+        (event) => {
+          const touch = event.touches && event.touches[0];
+          if (!touch) return;
+          maybeChase(touch.clientX, touch.clientY);
+        },
+        { passive: true }
+      );
+      const handleResize = () => {
+        if (noButton.dataset.fixed !== "true") return;
+        const currentLeft = parseFloat(noButton.style.left);
+        const currentTop = parseFloat(noButton.style.top);
+        if (Number.isNaN(currentLeft) || Number.isNaN(currentTop)) return;
+        placeNoButtonAt(currentLeft, currentTop);
+      };
+
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", handleResize);
+        window.visualViewport.addEventListener("scroll", handleResize);
+      }
+      window.addEventListener("resize", handleResize);
+    </script>
+  </body>
+</html>
